@@ -22,6 +22,7 @@ import {
   styleUrl,
   terrainOn,
 } from './theme';
+import { initSevasetuWidget, type SevasetuWidgetHandle } from './sevasetu/widget';
 
 // style.css is a <link> in index.html rather than an import here: it has to be
 // in effect at first paint, and a module import lands long after it.
@@ -52,6 +53,10 @@ map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePi
 map.addControl(new maplibregl.ScaleControl({ maxWidth: 100 }), 'bottom-left');
 
 const popup = new maplibregl.Popup({ closeButton: true, maxWidth: '320px' });
+
+// NM-3: SevaSetu widget handle — populated in map.once('load').
+// restyle() uses it to remount the active route after a style reload.
+let sevasetuHandle: SevasetuWidgetHandle | null = null;
 
 // Cached GeoJSON. setStyle() drops custom sources along with the old style, so a
 // theme switch rebuilds every layer from here instead of re-downloading.
@@ -529,6 +534,8 @@ function restyle(onFailure?: () => void): void {
     map.off('error', failed);
     syncTerrain(); // before the data layers, so the hillshade stays under them
     for (const def of LAYERS) if (data.has(def.id)) mount(def);
+    // NM-3: re-add the active SevaSetu route after all NM layers are remounted.
+    sevasetuHandle?.remount();
   });
   if (onFailure) map.on('error', failed);
   map.setStyle(url);
@@ -618,4 +625,5 @@ map.once('load', () => {
   setupThemeToggle();
   setupBasemapPicker();
   setupTerrainToggle();
+  sevasetuHandle = initSevasetuWidget(map);
 });

@@ -681,3 +681,958 @@ body {
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ── SevaSetu assistant widget ──────────────────────────────────────────────
+   Redesigned NM-7: larger type, cleaner layout, warmer feel.
+   All values use Nashik Monitor CSS variables.
+   z-index: 50 — below .notice (60) and #splash (100), above map controls.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Floating toggle button ──────────────────────────────────────────────── */
+.ss-toggle {
+  position: absolute;
+  right: 14px;
+  bottom: 54px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 28px;
+  background: var(--panel);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: background-color 0.18s var(--ease),
+              border-color 0.18s var(--ease),
+              color 0.18s var(--ease),
+              box-shadow 0.18s var(--ease);
+}
+.ss-toggle:hover,
+.ss-toggle--open {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 2px 12px rgba(179, 74, 46, 0.14);
+}
+.ss-toggle-icon { font-size: 16px; line-height: 1; }
+.ss-toggle-label { font-weight: 700; }
+.ss-toggle-badge {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+/* ── Panel ────────────────────────────────────────────────────────────────── */
+.ss-panel[hidden] { display: none; }
+.ss-panel {
+  position: absolute;
+  right: 14px;
+  bottom: 108px;
+  z-index: 50;
+  width: min(390px, calc(100vw - 28px));
+  max-height: min(580px, calc(100vh - 130px));
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(20, 17, 15, 0.04),
+              0 12px 32px rgba(20, 17, 15, 0.10);
+  overflow: hidden;
+  animation: ss-rise 0.2s var(--ease) both;
+}
+@keyframes ss-rise {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── Panel header ─────────────────────────────────────────────────────────── */
+.ss-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex: 0 0 auto;
+  background: var(--panel);
+}
+.ss-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ss-identity-mark {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  flex: 0 0 32px;
+  letter-spacing: -0.02em;
+}
+.ss-identity-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.ss-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Language select */
+.ss-lang {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease);
+}
+.ss-lang:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Voice toggle */
+.ss-voice-toggle {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.15s var(--ease),
+              border-color 0.15s var(--ease),
+              background-color 0.15s var(--ease);
+}
+.ss-voice-toggle:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.ss-voice-toggle--on {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+}
+.ss-voice-toggle:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Close button */
+.ss-close {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.15s var(--ease),
+              border-color 0.15s var(--ease),
+              background-color 0.15s var(--ease);
+}
+.ss-close:hover {
+  color: var(--text);
+  border-color: var(--text);
+  background: var(--hover);
+}
+
+/* ── Location bar ─────────────────────────────────────────────────────────── */
+.ss-location-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--hover);
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+.ss-gps-btn {
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s var(--ease),
+              border-color 0.15s var(--ease),
+              background-color 0.15s var(--ease);
+}
+.ss-gps-btn:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.ss-gps-btn--active {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.ss-gps-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.ss-location-select {
+  flex: 1 1 160px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ss-loc-warn {
+  width: 100%;
+  margin: 0;
+  padding: 5px 8px;
+  background: var(--accent-soft);
+  border-left: 2px solid var(--accent);
+  border-radius: 5px;
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.ss-switch-btn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.ss-switch-btn:hover { color: var(--accent); }
+
+/* ── Quick-action chips ───────────────────────────────────────────────────── */
+.ss-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+.ss-chip {
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s var(--ease),
+              border-color 0.15s var(--ease),
+              color 0.15s var(--ease);
+}
+.ss-chip:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.ss-chip:disabled { opacity: 0.4; cursor: default; }
+
+/* ── Listening banner ─────────────────────────────────────────────────────── */
+.ss-listening-banner {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--accent-soft);
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+.ss-listening-banner[hidden] { display: none; }
+
+.ss-listening-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: 0 0 8px;
+  animation: ss-rec-blink 1s step-start infinite;
+}
+@keyframes ss-rec-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+.ss-listening-text { flex: 1; }
+
+.ss-listening-lang {
+  /* also a .ss-listening-text — just adds a readable display */
+}
+
+.ss-listening-cancel {
+  padding: 3px 9px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
+}
+.ss-listening-cancel:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Microphone button ────────────────────────────────────────────────────── */
+.ss-mic-btn {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.15s var(--ease),
+              border-color 0.15s var(--ease),
+              background-color 0.15s var(--ease);
+}
+.ss-mic-btn:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.ss-mic-btn--active {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+  animation: ss-mic-pulse 1.4s ease-in-out infinite;
+}
+.ss-mic-btn:disabled { opacity: 0.35; cursor: default; }
+@keyframes ss-mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 35%, transparent); }
+  50%       { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+
+/* ── Conversation area ────────────────────────────────────────────────────── */
+.ss-conversation {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  scroll-behavior: smooth;
+}
+
+/* Welcome message */
+.ss-welcome {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 4px 0;
+}
+.ss-welcome p { margin: 0 0 6px; }
+.ss-welcome p:last-child { margin: 0; }
+
+/* Message rows */
+.ss-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.ss-row--user { flex-direction: row-reverse; }
+.ss-row--error { flex-direction: row; }
+
+/* Avatar */
+.ss-avatar {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  flex: 0 0 26px;
+  margin-top: 1px;
+}
+
+/* Chat bubbles */
+.ss-bubble {
+  max-width: 80%;
+  padding: 10px 13px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.ss-bubble p { margin: 0 0 5px; }
+.ss-bubble p:last-child { margin: 0; }
+.ss-bubble--user {
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  font-size: 13.5px;
+}
+.ss-bubble--bot {
+  /* Slightly warmer than --hover to feel more like a card, less like a chip */
+  background: color-mix(in srgb, var(--hover) 70%, var(--panel) 30%);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+.ss-bubble--error {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  color: var(--accent);
+  border-radius: 8px;
+  font-size: 13px;
+  max-width: 90%;
+}
+
+/* ── POI destination card ─────────────────────────────────────────────────── */
+.ss-poi-card {
+  margin-top: 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  overflow: hidden;
+}
+.ss-poi-card--fallback {
+  border-left: 3px solid var(--accent);
+}
+
+/* Category pill above the name */
+.ss-poi-header {
+  padding: 10px 13px 0;
+}
+.ss-poi-cat-pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Destination name — big and clear */
+.ss-poi-name {
+  margin: 6px 0 0;
+  padding: 0 13px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+/* Stats row */
+.ss-poi-stats {
+  display: flex;
+  gap: 8px;
+  padding: 10px 13px 0;
+}
+.ss-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 20px;
+  background: var(--hover);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.ss-stat-icon { font-size: 13px; line-height: 1; }
+.ss-stat-value { font-variant-numeric: tabular-nums; }
+
+/* Address */
+.ss-poi-addr {
+  margin: 8px 0 0;
+  padding: 0 13px 12px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.ss-poi-addr-icon { flex: 0 0 auto; margin-top: 1px; font-size: 11px; }
+
+.ss-fallback-note {
+  margin: 0;
+  padding: 8px 13px 12px;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Directions — collapsible ─────────────────────────────────────────────── */
+.ss-directions {
+  margin-top: 8px;
+}
+
+/* Fallback note (no steps) */
+.ss-directions-fallback {
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--hover);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Toggle button — looks like a row you tap to expand */
+.ss-dir-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 13px;
+  border: 2px solid var(--accent);          /* accent border — clearly interactive */
+  border-radius: 10px;
+  background: var(--accent-soft);           /* tinted so it stands out */
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s var(--ease),
+              border-color 0.15s var(--ease),
+              box-shadow 0.15s var(--ease);
+  /* Subtle glow to signal interactivity */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.ss-dir-toggle:hover {
+  background: color-mix(in srgb, var(--accent-soft) 80%, var(--accent) 20%);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.ss-dir-toggle:active {
+  transform: scale(0.99);
+}
+
+.ss-dir-toggle-label { flex: 1; }
+
+/* Small "tap to expand" hint below the label */
+.ss-dir-toggle-hint {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--accent) 70%, transparent);
+  margin-top: 1px;
+  display: block;
+}
+
+.ss-dir-chevron {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  transition: transform 0.22s var(--ease);
+  display: inline-block;
+  transform: rotate(0deg);
+  margin-left: 6px;
+}
+.ss-dir-chevron--open {
+  transform: rotate(90deg);
+}
+
+/* Step list — scrollable, NOT overflow:hidden (that kills the scroll) */
+.ss-steps {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;             /* scroll when steps exceed max-height */
+  overflow-x: hidden;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  /* border-radius clips children without overflow:hidden by using
+     will-change + isolation on the list items */
+  isolation: isolate;
+}
+/* Fix: list[hidden] must stay hidden */
+.ss-steps[hidden] { display: none; }
+
+/* Each step */
+.ss-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 13px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.ss-step:last-child { border-bottom: none; }
+
+/* Vertical connector line between steps */
+.ss-step:not(.ss-step--last)::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 38px;
+  bottom: -1px;
+  width: 2px;
+  background: var(--border);
+}
+
+/* Direction icon bubble */
+.ss-step-icon {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--accent);
+  position: relative;
+  z-index: 1;          /* sits above the connector line */
+}
+
+/* Step body */
+.ss-step-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 2px;
+}
+.ss-step-instruction {
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--text);
+  font-weight: 500;
+}
+.ss-step-dist {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+
+/* Destination step gets accent colour */
+.ss-step--last .ss-step-icon {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.ss-step--last .ss-step-instruction {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Typing indicator ─────────────────────────────────────────────────────── */
+.ss-typing {
+  display: flex;
+  gap: 5px;
+  padding: 8px 4px;
+}
+.ss-typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: ss-bounce 1s infinite ease-in-out both;
+}
+.ss-typing span:nth-child(1) { animation-delay: 0s; }
+.ss-typing span:nth-child(2) { animation-delay: 0.16s; }
+.ss-typing span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes ss-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+.ss-typing-label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  align-self: center;
+}
+.ss-row--bot .ss-typing-label { padding-left: 35px; }
+
+/* ── Input bar ────────────────────────────────────────────────────────────── */
+.ss-input-bar {
+  display: flex;
+  gap: 7px;
+  padding: 11px 14px;
+  border-top: 1px solid var(--border);
+  flex: 0 0 auto;
+  background: var(--panel);
+}
+.ss-input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s var(--ease);
+}
+.ss-input:focus { border-color: var(--accent); }
+.ss-input:disabled { opacity: 0.5; }
+.ss-input::placeholder { color: var(--muted); }
+.ss-send {
+  padding: 9px 14px;
+  border: none;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s var(--ease), transform 0.1s var(--ease);
+  letter-spacing: 0.01em;
+}
+.ss-send:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: scale(1.03);
+}
+.ss-send:disabled { opacity: 0.4; cursor: default; }
+
+/* ── NM-9: Clarification chips (vehicle_type) ──────────────────────────────
+   Shown inline in the bot bubble when ambiguous_vehicle intent fires.
+   ──────────────────────────────────────────────────────────────────────────── */
+.ss-clarify-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.ss-clarify-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 2px solid var(--accent);
+  border-radius: 22px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s var(--ease),
+              color 0.15s var(--ease),
+              transform 0.1s var(--ease);
+}
+.ss-clarify-chip:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: scale(1.03);
+}
+
+/* ── Destination marker (NM-3) ────────────────────────────────────────────── */
+.ss-dest-marker {
+  width: 28px;
+  height: 36px;
+  background: var(--accent);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  position: relative;
+  cursor: default;
+  filter: drop-shadow(0 2px 5px rgba(20, 17, 15, 0.3));
+  transition: transform 0.15s var(--ease);
+}
+.ss-dest-marker::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 10px solid var(--accent);
+}
+.ss-dest-marker::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.9;
+}
+.ss-dest-marker:hover { transform: scale(1.1); }
+
+/* ── User-location marker (NM-6.1) ───────────────────────────────────────── */
+.ss-user-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #2563eb, 0 2px 6px rgba(37, 99, 235, 0.45);
+  cursor: default;
+  animation: ss-user-pulse 2.5s ease-in-out infinite;
+}
+@keyframes ss-user-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px #2563eb, 0 2px 6px rgba(37, 99, 235, 0.45); }
+  50%       { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.18), 0 2px 6px rgba(37, 99, 235, 0.3); }
+}
+
+/* ── Mobile adjustments ≤720px ─────────────────────────────────────────────
+   At this breakpoint the widget fills nearly the full viewport height so the
+   conversation area and input bar are comfortably usable on a phone.
+   ──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  /* Toggle button — tighter, bottom-right corner */
+  .ss-toggle {
+    right: 12px;
+    bottom: 16px;
+    padding: 9px 14px;
+    font-size: 13px;
+    gap: 7px;
+  }
+  .ss-toggle-badge { display: none; }
+
+  /* Panel fills ~90% of viewport height, edge-to-edge width */
+  .ss-panel {
+    position: fixed;         /* break out of the map container on mobile */
+    inset: auto 0 0 0;       /* pin to bottom, full width */
+    width: 100%;
+    bottom: 0;
+    max-height: 92svh;       /* nearly full screen — leaves a sliver of map */
+    border-radius: 20px 20px 0 0;  /* rounded top corners like a bottom sheet */
+    border-bottom: none;
+    /* Slide up from the bottom */
+    animation: ss-slide-up 0.24s var(--ease) both;
+    box-shadow: 0 -4px 24px rgba(20, 17, 15, 0.14);
+  }
+  @keyframes ss-slide-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Give header more breathing room for thumb targets */
+  .ss-header {
+    padding: 16px 16px 13px;
+  }
+
+  /* Location bar: allow the select to fill remaining space cleanly */
+  .ss-location-bar {
+    padding: 8px 14px;
+    gap: 7px;
+  }
+  .ss-location-select {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  /* Quick chips: horizontal scroll on very small screens */
+  .ss-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 9px 14px;
+    gap: 7px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .ss-chips::-webkit-scrollbar { display: none; }
+  .ss-chip {
+    flex: 0 0 auto;
+    padding: 6px 13px;
+    font-size: 13px;
+  }
+
+  /* Conversation area — let it grow to fill available height */
+  .ss-conversation {
+    padding: 12px 14px;
+    gap: 11px;
+  }
+
+  /* Bubbles — allow wider on small screens */
+  .ss-bubble { max-width: 88%; }
+
+  /* Larger touch targets for input bar */
+  .ss-input-bar {
+    padding: 10px 12px 14px; /* extra bottom padding above home indicator */
+    gap: 8px;
+  }
+  .ss-input {
+    font-size: 16px; /* prevents iOS zoom on focus */
+    padding: 10px 13px;
+  }
+  .ss-send {
+    padding: 10px 16px;
+    font-size: 15px;
+  }
+  .ss-mic-btn {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  /* POI name slightly smaller to avoid overflow */
+  .ss-poi-name { font-size: 15px; }
+
+  /* Stat chips stay on one line */
+  .ss-poi-stats { gap: 6px; }
+  .ss-stat-chip { font-size: 12px; padding: 4px 9px; }
+
+  /* Steps list: no max-height restriction — scroll the whole conversation */
+  .ss-steps { max-height: none; }
+
+  /* Clarification chips — bigger tap targets */
+  .ss-clarify-chip {
+    padding: 9px 16px;
+    font-size: 14px;
+  }
+}

@@ -44,7 +44,15 @@ Basemap is [OpenFreeMap](https://openfreemap.org) — `positron` for light,
 | `src/confidence.ts` | the accuracy vocabularies, and what each grade tells a reader |
 | `src/descriptions.ts` | what each layer is, where it came from, and what it will mislead you about |
 | `src/splash.ts` | intro sequence timing and skip |
-| `src/style.css` | design tokens, splash, shell, popup |
+| `src/style.css` | design tokens, splash, shell, popup, SevaSetu widget |
+| `src/sevasetu/client.ts` | typed `fetch` wrapper — calls `POST /api/assist`, no business logic |
+| `src/sevasetu/types.ts` | API contract types shared across the SevaSetu integration |
+| `src/sevasetu/widget.ts` | chat panel DOM, location state machine, voice input/output |
+| `src/sevasetu/gps.ts` | browser GPS — `watchPosition` with 200 m accuracy threshold |
+| `src/sevasetu/mapRoute.ts` | MapLibre route line, user-location marker, destination marker |
+| `src/sevasetu/speech.ts` | browser Web Speech API — STT recognition and TTS synthesis |
+| `src/sevasetu/locations.ts` | predefined fallback volunteer post locations for manual selection |
+| `vite.config.ts` | dev proxy — forwards `/api/assist` to `localhost:3001` when `VITE_SEVASETU_API_URL` is unset |
 | `scripts/build-datasets.mjs` | splits the master NTKMA KML into per-layer GeoJSON |
 | `scripts/build-mobility.mjs` | splits the administrator's mobility-plan KMZ into layers |
 | `scripts/build-citilink.mjs` | Citilinc bus stops and depots, from the RTI annexure |
@@ -296,6 +304,76 @@ stay a reference table rather than a map layer: drawing a line between a route's
 named endpoints would invent a path the document never gives. `scripts/build-datasets.mjs` takes the KML path as its
 first argument, so regenerating the four KML-derived layers needs a local copy of
 the NTKMA master file.
+
+## SevaSetu Field Assistant
+
+A floating "Ask SevaSetu" panel on the map lets field volunteers ask questions in
+Hindi, Marathi, Tamil, Gujarati, English, and other Indian languages and receive
+location-aware guidance: nearest toilet, hospital, police chowki, water point,
+parking zone, bus stop, and more. Responses are spoken aloud via the browser's
+speech synthesis and a walking route is drawn on the map.
+
+### Architecture
+
+Nashik Monitor is the client. All assistance intelligence — intent resolution,
+POI search, distance calculation, routing, and multilingual response generation
+— lives in a separate SevaSetu service. Nashik Monitor sends a query and GPS
+coordinates; the service returns a structured response.
+
+```
+Nashik Monitor
+    ↓  POST /api/assist  { message, location, language }
+SevaSetu service
+    ↓  intent + nearest POI + walking route + localised reply
+Nashik Monitor map / chat UI
+```
+
+No SevaSetu intent logic, POI data, or routing code lives in this repository.
+
+### What the integration provides
+
+- Browser GPS with a 200 m accuracy threshold, falling back to a predefined
+  volunteer post selector when GPS is unavailable or denied
+- Chat input and quick-action chips
+- Voice input via browser SpeechRecognition; voice output via SpeechSynthesis
+- POI destination marker and walking route line on the MapLibre map
+- Multilingual responses in the volunteer's detected language
+
+### Local development
+
+Create `.env.local` in the project root (this file is gitignored and must never
+be committed):
+
+```
+VITE_SEVASETU_API_URL=https://sevasetu-iota-two.vercel.app
+```
+
+When `VITE_SEVASETU_API_URL` is set, the dev server calls the live SevaSetu
+service directly. When it is unset, `vite.config.ts` proxies `/api/assist` to
+`http://localhost:3001`, which expects a local SevaSetu server running there.
+
+`VITE_*` variables are inlined into the client bundle at build time. Never put
+secrets in them.
+
+### Production deployment
+
+Before building or deploying Nashik Monitor, set `VITE_SEVASETU_API_URL` in
+the deployment platform's environment configuration:
+
+**Vercel:** Project Settings → Environment Variables → add `VITE_SEVASETU_API_URL`
+with value `https://sevasetu-iota-two.vercel.app` scoped to Production →
+redeploy.
+
+Other platforms (Netlify, Cloudflare Pages, etc.) have equivalent build-time
+environment variable settings.
+
+### CORS requirement
+
+The SevaSetu service restricts which origins may call it. The operator of the
+SevaSetu service must add the deployed Nashik Monitor origin (e.g.
+`https://nashik-monitor-v2.vercel.app`) to the service's `CORS_ALLOWED_ORIGINS`
+environment variable before the integration will work in production. This is a
+configuration change on the SevaSetu side, not in this repository.
 
 ## Roadmap
 
